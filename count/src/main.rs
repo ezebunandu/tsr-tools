@@ -1,15 +1,12 @@
-use std::{
-    env,
-    fs::File,
-    io::{BufReader, Error, Result},
-};
+use anyhow::{Context, Result};
+use std::{env, fs::File, io::BufReader};
 
 use count::count_lines;
 
 fn main() -> Result<()> {
     let path = env::args()
         .nth(1)
-        .ok_or(Error::other("Usage: count <FILE>"))?;
+        .context("Usage: count <FILE>")?;
     let file = File::open(&path)?;
     let file = BufReader::new(file);
     let lines = count_lines(file)?;
