@@ -1,38 +1,55 @@
-use std::io::{BufRead, Result};
+use std::{
+    fs::File,
+    io::{BufRead, BufReader},
+};
+
+use anyhow::{Context, Result};
 
 pub fn count_lines(input: impl BufRead) -> Result<usize> {
     let mut count = 0;
-    for line in input.lines(){
+    for line in input.lines() {
         line?;
         count += 1;
     }
     Ok(count)
 }
 
+pub fn count_lines_in_path(path: &String) -> Result<usize> {
+    let file = File::open(path).with_context(|| path.clone())?;
+    let file = BufReader::new(file);
+    count_lines(file).with_context(|| path.clone())
+}
+
 #[cfg(test)]
 mod tests {
-    use std::io::{BufReader, Cursor, Error, Read};
     use super::*;
+    use std::io::{self, BufReader, Cursor, Error, Read};
 
     #[test]
-    fn count_lines_fn_counts_lines_in_input(){
+    fn count_lines_fn_counts_lines_in_input() {
         let input = Cursor::new("line 1\nline2\n");
         let lines = count_lines(input).unwrap();
         assert_eq!(lines, 2, "wrong line count");
     }
     struct ErrorReader;
-    
+
     impl Read for ErrorReader {
-        fn read(&mut self, _buf: &mut [u8]) -> Result<usize> {
+        fn read(&mut self, _buf: &mut [u8]) -> io::Result<usize> {
             Err(Error::other("oh no"))
         }
     }
-    
+
     #[test]
-    fn count_lines_fn_returns_any_read_error(){
+    fn count_lines_fn_returns_any_read_error() {
         let reader = BufReader::new(ErrorReader);
         let result = count_lines(reader);
         assert!(result.is_err(), "no error returned");
     }
 
+    #[test]
+    fn count_lines_in_path_counts_lines_in_given_file() {
+        let path = String::from("tests/data/two_lines.txt");
+        let lines = count_lines_in_path(&path).unwrap();
+        assert_eq!(lines, 2, "want 3 lines for input");
+    }
 }
