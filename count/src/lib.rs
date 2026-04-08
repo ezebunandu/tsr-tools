@@ -14,6 +14,14 @@ pub fn count_lines(input: impl BufRead) -> Result<usize> {
     Ok(count)
 }
 
+pub fn count_words(input: impl BufRead) -> Result<usize> {
+    let mut count = 0;
+    for line in input.lines(){
+        count += line?.split_whitespace().count();
+    }
+    Ok(count)
+}
+
 pub fn count_lines_in_path(path: &String) -> Result<usize> {
     let file = File::open(path).with_context(|| path.clone())?;
     let file = BufReader::new(file);
@@ -31,6 +39,13 @@ mod tests {
         let lines = count_lines(input).unwrap();
         assert_eq!(lines, 2, "wrong line count");
     }
+    #[test]
+    fn count_words_fn_counts_words_in_input() {
+        let input = Cursor::new("one two1\nthree2\n");
+        let words = count_words(input).unwrap();
+        assert_eq!(words, 3, "wrong word count");
+    }
+
     struct ErrorReader;
 
     impl Read for ErrorReader {
@@ -47,9 +62,9 @@ mod tests {
     }
 
     #[test]
-    fn count_lines_in_path_counts_lines_in_given_file() {
+    fn count_lines_in_path_fn_counts_lines_in_given_file() {
         let path = String::from("tests/data/two_lines.txt");
         let lines = count_lines_in_path(&path).unwrap();
-        assert_eq!(lines, 2, "want 3 lines for input");
+        assert_eq!(lines, 2, "want 2 lines for input");
     }
 }
