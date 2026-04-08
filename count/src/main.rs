@@ -1,7 +1,7 @@
 use anyhow::{Result, bail};
 use std::env;
 
-use count::count_lines_in_path;
+use count::count_in_path;
 
 fn main() -> Result<()> {
     let args: Vec<_> = env::args().skip(1).collect();
@@ -9,7 +9,8 @@ fn main() -> Result<()> {
         bail!("Usage: count <FILE>...");
     }
     for path in args {
-        println!("{path}: {} lines", count_lines_in_path(&path)?);
+        let count = count_in_path(&path)?;
+        println!("{path}: {} lines", count.lines);
     }
     Ok(())
 }
