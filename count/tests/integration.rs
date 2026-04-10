@@ -17,3 +17,12 @@ fn binary_counts_lines_in_named_files() {
         .success()
         .stdout("tests/data/two_lines.txt: 2 lines\ntests/data/three_lines.txt: 3 lines\n");
 }
+
+#[test]
+fn binary_with_w_flag_counts_words() {
+    cargo_bin_cmd!("count")
+        .args(["-w", "tests/data/three_lines.txt"])
+        .assert()
+        .success()
+        .stdout("tests/data/three_lines.txt: 6 words\n");
+}
