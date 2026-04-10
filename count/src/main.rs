@@ -1,21 +1,24 @@
-use anyhow::{Result, bail};
-use std::env;
+use clap::Parser;
+use anyhow::Result;
 
 use count::count_in_path;
 
+#[derive(Parser)]
+/// Counts lines or words in the specified files
+struct Args {
+    /// Counts words instead of lines
+    #[arg(short, long)]
+    word: bool,
+    /// Files to be counted
+    #[arg(required = true)]
+    files: Vec<String>,
+}
+
 fn main() -> Result<()> {
-    let args: Vec<_> = env::args().skip(1).collect();
-    if args.is_empty() {
-        bail!("Usage: count [-w] <FILE>...");
-    }
-    let mut word_mode = false;
-    for path in args {
-        if path == "-w" {
-            word_mode = true;
-            continue;
-        }
+    let args = Args::parse();
+    for path in args.files {
         let count = count_in_path(&path)?;
-        if word_mode {
+        if args.word {
             println!("{path}: {} words", count.words);
         } else {
             println!("{path}: {} lines", count.lines);
