@@ -16,7 +16,10 @@ pub fn count(mut input: impl BufRead) -> Result<Count> {
     let mut count = Count::default();
     let mut line = String::new();
     while input.read_line(&mut line)? > 0 {
-        count.words = count.words.checked_add(line.split_whitespace().count()).context("overflow")?;
+        count.words = count
+            .words
+            .checked_add(line.split_whitespace().count())
+            .context("overflow")?;
         count.lines = count.lines.checked_add(1).context("overflow")?;
         count.bytes = count.bytes.checked_add(line.len()).context("overflow")?;
 
@@ -53,11 +56,12 @@ mod tests {
     }
 
     #[test]
-    fn count_in_path_fn_counts_lines_and_words_in_given_path() {
+    fn count_in_path_fn_counts_lines_words_and_bytes_in_given_path() {
         let path = String::from("tests/data/two_lines.txt");
         let count = count_in_path(&path).unwrap();
         assert_eq!(count.lines, 2, "wrong line count");
         assert_eq!(count.words, 4, "wrong word count");
+        assert_eq!(count.bytes, 13, "wrong byte count");
     }
 
     struct ErrorReader;
